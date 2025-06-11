@@ -34,15 +34,13 @@ def submit_application():
     try:
         print(f"\n🚀 Starting submission at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-        # Configure Chrome
         options = Options()
-        options.add_argument("--headless=new")  # Modern headless
+        options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--disable-blink-features=AutomationControlled")
-        options.add_argument("--window-size=1920,1080")
 
-        # With this:
+        # Force Chrome version 114
+        options.browser_version = "114"
         driver = webdriver.Chrome(
             service=Service('/usr/local/bin/chromedriver'),
             options=options
