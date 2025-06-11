@@ -3,12 +3,12 @@ name: Run Selenium Automation
 on:
   schedule:
     - cron: '0 * * * *'  # Hourly
-  workflow_dispatch:      # Allow manual triggers
+  workflow_dispatch:
 
 jobs:
   automate:
     runs-on: ubuntu-latest
-    timeout-minutes: 5    # Fail fast if stuck
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
@@ -18,21 +18,25 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Google Chrome (DEB Package)
+      - name: Install Google Chrome
         run: |
           sudo apt-get update
           wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
           sudo rm google-chrome-stable_current_amd64.deb
-          echo "Chrome version:" $(google-chrome --version)
+          google-chrome --version
 
-      - name: Install Chromedriver
+      - name: Install Chromedriver (Fixed Version)
         run: |
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
-          wget -q "https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip"
+          # Get major Chrome version (e.g., 137.0.7151.103 → 137.0.7151)
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d'.' -f1-3)
+          echo "Installing Chromedriver for Chrome version $CHROME_VERSION"
+          wget -q "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION"
+          CHROMEDRIVER_VERSION=$(cat LATEST_RELEASE_$CHROME_VERSION)
+          wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
-          echo "Chromedriver version:" $(chromedriver --version)
+          chromedriver --version
 
       - name: Install Python packages
         run: |
