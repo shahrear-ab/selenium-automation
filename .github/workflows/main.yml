@@ -18,26 +18,22 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install System Dependencies
+      - name: Install Stable Chrome Version
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip
-
-      - name: Install Chrome and Chromedriver
-        run: |
-          # Install specific Chrome version that has matching Chromedriver
           wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
           sudo rm google-chrome-stable_current_amd64.deb
           
-          # Install pre-downloaded Chromedriver (version 114.0.5735.90)
+          # Install matching Chromedriver (114.0.5735.90)
           wget -q https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
           
-          echo "Chrome version:" $(google-chrome --version)
-          echo "Chromedriver version:" $(chromedriver --version)
+          echo "Versions:"
+          google-chrome --version
+          chromedriver --version
 
       - name: Install Python packages
         run: |
