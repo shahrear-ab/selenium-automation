@@ -1,41 +1,40 @@
-name: Run Selenium 10x Daily
+name: Run Selenium Automation
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Hourly
-  workflow_dispatch:       # Allow manual runs
+    - cron: '0 * * * *'  # Runs at the start of every hour
+  workflow_dispatch:     # Allow manual triggers
 
 jobs:
   automate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10  # Prevent hanging jobs
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4  # Use latest version
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'  # ✅ change from '3.1' to a supported version
+          python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install Chrome and Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip xvfb libxi6 libgconf-2-4 libnss3 libxss1 libappindicator1 libindicator7 fonts-liberation libatk-bridge2.0-0 libgtk-3-0
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome*.deb || sudo apt-get -f install -y
+          # Install minimal required dependencies
+          sudo apt-get install -y chromium-browser chromium-chromedriver xvfb
+          # Verify installations
+          chromium-browser --version
+          chromedriver --version
+
+      - name: Install Python packages
+        run: |
+          pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run Selenium Script
         run: |
-          Xvfb :99 &  # headless display
+          # Start virtual display and run script
+          Xvfb :99 -screen 0 1280x1024x24 &
           export DISPLAY=:99
           python main.py
-
-      - name: Install Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
-          sudo apt-get install -y chromium-chromedriver
-          # Verify installation
-          chromium-browser --version
-          chromedriver --version
