@@ -1,0 +1,21 @@
+name: Run Selenium 10x Daily
+on:
+  schedule:
+    - cron: '0 */2 * * *'  # Runs every 2 hours (12x/day)
+  workflow_dispatch:  # Optional: Allows manual runs
+
+jobs:
+  automate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4  # Check out your code
+
+      - name: Install Python + Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
+          pip install -r requirements.txt
+
+      - name: Run Selenium Script
+        run: |
+          python main.py
