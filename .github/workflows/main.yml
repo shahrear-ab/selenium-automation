@@ -30,3 +30,12 @@ jobs:
           Xvfb :99 &  # headless display
           export DISPLAY=:99
           python main.py
+
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
+          sudo apt-get install -y chromium-chromedriver
+          # Verify installation
+          chromium-browser --version
+          chromedriver --version
