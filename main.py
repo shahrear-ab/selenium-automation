@@ -34,6 +34,7 @@ def submit_application():
     try:
         print(f"\n🚀 Starting submission at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
+        # Replace your driver setup with this:
         options = Options()
         options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
@@ -41,8 +42,7 @@ def submit_application():
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1920,1080")
 
-        # Force Chrome version 114
-        options.browser_version = "114"
+        # Use explicit chromedriver path
         driver = webdriver.Chrome(
             service=Service('/usr/local/bin/chromedriver'),
             options=options
