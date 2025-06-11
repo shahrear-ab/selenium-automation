@@ -3,12 +3,12 @@ name: Run Selenium Automation
 on:
   schedule:
     - cron: '0 * * * *'  # Hourly
-  workflow_dispatch:
+  workflow_dispatch:      # Allow manual triggers
 
 jobs:
   automate:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 5    # Fail fast if stuck
 
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +29,7 @@ jobs:
       - name: Install Chromedriver
         run: |
           CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
-          wget -q https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
+          wget -q "https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip"
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
           echo "Chromedriver version:" $(chromedriver --version)
