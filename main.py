@@ -31,18 +31,15 @@ def safe_upload(element, path):
     element.send_keys(os.path.abspath(path))
 
 def submit_application():
+    driver = None  # Initialize driver variable
     try:
         print(f"\n🚀 Starting submission at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-
-        # Replace your driver setup with this:
+        
         options = Options()
         options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--disable-gpu")
-        options.add_argument("--window-size=1920,1080")
-
-        # Use explicit chromedriver path
+        
         driver = webdriver.Chrome(
             service=Service('/usr/local/bin/chromedriver'),
             options=options
@@ -95,10 +92,11 @@ def submit_application():
 
     except Exception as e:
         print(f"❌ Failed: {str(e)}")
-        driver.save_screenshot(f"error_{int(time.time())}.png")
+        if driver:  # Only save screenshot if driver was created
+            driver.save_screenshot(f"error_{int(time.time())}.png")
         return False
     finally:
-        try: 
+        if driver:
             driver.quit()
         except: 
             pass
