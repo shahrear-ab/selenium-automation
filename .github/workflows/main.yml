@@ -18,47 +18,46 @@ jobs:
         with:
           python-version: '3.10'
 
-
-      - name: Clean System
-        run: |
-          sudo apt-get autoremove -y
-          sudo apt-get clean
-          sudo rm -rf /var/lib/apt/lists/*
-
-
       - name: Install Matching Chrome/Chromedriver
         run: |
-          # Clean up any existing Chrome installations
-          sudo pkill -f chrome || true
+          # Clean system first
           sudo apt-get remove -y google-chrome-stable || true
-          sudo rm -rf /etc/apt/sources.list.d/google-chrome.list
-          
-          # Install dependencies
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
-          sudo apt-get install -y wget unzip
-          
-          # Download and install Chrome 114
-          wget -q https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb || curl -L -o google-chrome-stable_114.0.5735.90-1_amd64.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
-          sudo apt-get install -y ./google-chrome-stable_114.0.5735.90-1_amd64.deb
-          sudo rm google-chrome-stable_114.0.5735.90-1_amd64.deb
-          
+
+          # Method 1: Download from Google (with checksum verification)
+          wget -q --show-progress --progress=bar:force:noscroll \
+            https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb \
+            -O chrome.deb || \
+          curl -L \
+            https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb \
+            -o chrome.deb
+
+          # Verify download integrity
+          if ! dpkg-deb -I chrome.deb >/dev/null 2>&1; then
+            echo "Download corrupted, trying mirror..."
+            rm -f chrome.deb
+            # Method 2: Alternative mirror
+            wget -q https://objectstorage.us-ashburn-1.oraclecloud.com/n/id6mjcfxzo8a/b/chrome-mirror/o/google-chrome-stable_114.0.5735.90-1_amd64.deb \
+              -O chrome.deb || \
+            curl -L https://objectstorage.us-ashburn-1.oraclecloud.com/n/id6mjcfxzo8a/b/chrome-mirror/o/google-chrome-stable_114.0.5735.90-1_amd64.deb \
+              -o chrome.deb
+          fi
+
+          # Install Chrome
+          sudo apt-get install -y ./chrome.deb
+          sudo rm -f chrome.deb
+
           # Install matching Chromedriver
-          wget -q https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip || curl -L -o chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+          wget -q --tries=3 https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
-          
+
           echo "Versions:"
           google-chrome --version
           chromedriver --version
 
-      - name: Verify Installation
-        run: |
-          echo "Checking versions:"
-          google-chrome --version || echo "Chrome not found"
-          chromedriver --version || echo "Chromedriver not found"
-          ls -la /usr/local/bin/chromedriver || echo "No chromedriver binary"
-      
       - name: Install Python packages
         run: |
           pip install selenium webdriver-manager
