@@ -2,39 +2,42 @@ name: Run Selenium Automation
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs at the start of every hour
-  workflow_dispatch:     # Allow manual triggers
+    - cron: '0 * * * *'  # Hourly
+  workflow_dispatch:
 
 jobs:
   automate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10  # Prevent hanging jobs
+    timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v4  # Use latest version
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Install Chrome and Dependencies
+      - name: Install Google Chrome (DEB Package)
         run: |
           sudo apt-get update
-          # Install minimal required dependencies
-          sudo apt-get install -y chromium-browser chromium-chromedriver xvfb
-          # Verify installations
-          chromium-browser --version
-          chromedriver --version
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+          sudo rm google-chrome-stable_current_amd64.deb
+          echo "Chrome version:" $(google-chrome --version)
+
+      - name: Install Chromedriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
+          wget -q https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          echo "Chromedriver version:" $(chromedriver --version)
 
       - name: Install Python packages
         run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install selenium webdriver-manager
 
-      - name: Run Selenium Script
+      - name: Run script
         run: |
-          # Start virtual display and run script
-          Xvfb :99 -screen 0 1280x1024x24 &
-          export DISPLAY=:99
           python main.py
