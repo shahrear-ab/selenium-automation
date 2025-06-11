@@ -11,22 +11,19 @@ import os
 import random
 from datetime import datetime
 
-# Paths to photos in the repo
-PHOTO_PATH = os.path.join(os.getcwd(), "Shahrear Abedin Bhuiyan.jpg")  # Adjust filenames
+# Paths to photos
+PHOTO_PATH = os.path.join(os.getcwd(), "Shahrear Abedin Bhuiyan.jpg")
 UNIVERSITY_PHOTO_PATH = os.path.join(os.getcwd(), "Result.jpg")
 
 def random_delay(min=1, max=3):
-    """Random delay between actions to appear more human-like"""
     time.sleep(random.uniform(min, max))
 
 def safe_clear_send(element, text):
-    """Safely clear and send keys to an element"""
     element.clear()
     random_delay(0.5, 1)
     element.send_keys(text)
 
 def safe_upload(element, path):
-    """Validate and upload file with random delay"""
     if not os.path.exists(path):
         raise FileNotFoundError(f"File not found: {path}")
     element.clear()
@@ -36,16 +33,15 @@ def safe_upload(element, path):
 def submit_application():
     try:
         print(f"\n🚀 Starting submission at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        
-        # Configure Chrome (Headless for GitHub Actions)
+
+        # Configure Chrome
         options = Options()
-        options.add_argument("--headless")
+        options.add_argument("--headless=new")  # Modern headless
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-blink-features=AutomationControlled")
-        options.add_argument("--start-maximized")
+        options.add_argument("--window-size=1920,1080")
 
-        
         driver = webdriver.Chrome(
             service=Service(ChromeDriverManager().install()),
             options=options
@@ -67,10 +63,8 @@ def submit_application():
             WebDriverWait(driver, 15).until(EC.visibility_of_element_located((By.NAME, "fullName"))),
             "Shahrear Abedin Bhuiyan"
         )
-
-        safe_upload(
-            driver.find_element(By.NAME, "photo"), PHOTO_PATH)
-
+        safe_upload(driver.find_element(By.NAME, "photo"), PHOTO_PATH)
+        
         # Continue with other fields...
         safe_clear_send(driver.find_element(By.NAME, "address"), "House 13, Road 5, Block D Banasree Rampura Dhaka 1219")
         safe_clear_send(driver.find_element(By.NAME, "fatherName"), "Jabed Hasan Bhuiyan")
@@ -78,12 +72,9 @@ def submit_application():
         safe_clear_send(driver.find_element(By.NAME, "motherName"), "Shahnaz Begum")
         safe_clear_send(driver.find_element(By.NAME, "motherNumber"), "01730761793")
 
-        Select(driver.find_element(By.NAME, "university-name-1")
-              ).select_by_visible_text("BUET - Engineering")
+        Select(driver.find_element(By.NAME, "university-name-1")).select_by_visible_text("BUET - Engineering")
         safe_clear_send(driver.find_element(By.NAME, "university-merit-1"), "570")
-
-        safe_upload(
-            driver.find_element(By.NAME, "universityPhoto"), UNIVERSITY_PHOTO_PATH)
+        safe_upload(driver.find_element(By.NAME, "universityPhoto"), UNIVERSITY_PHOTO_PATH)
 
         # Final submission
         submit_btn = WebDriverWait(driver, 20).until(
@@ -103,12 +94,13 @@ def submit_application():
 
     except Exception as e:
         print(f"❌ Failed: {str(e)}")
-        # Take screenshot if needed
         driver.save_screenshot(f"error_{int(time.time())}.png")
         return False
     finally:
-        try: driver.quit()
-        except: pass
+        try: 
+            driver.quit()
+        except: 
+            pass
 
 if __name__ == "__main__":
     submit_application()
