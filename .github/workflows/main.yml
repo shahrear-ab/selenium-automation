@@ -24,19 +24,28 @@ jobs:
           wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
           sudo rm google-chrome-stable_current_amd64.deb
-          google-chrome --version
+          echo "Chrome version:" $(google-chrome --version)
 
-      - name: Install Chromedriver (Fixed Version)
+      - name: Install Matching Chromedriver
         run: |
           # Get major Chrome version (e.g., 137.0.7151.103 → 137.0.7151)
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d'.' -f1-3)
-          echo "Installing Chromedriver for Chrome version $CHROME_VERSION"
-          wget -q "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION"
-          CHROMEDRIVER_VERSION=$(cat LATEST_RELEASE_$CHROME_VERSION)
-          wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
-          unzip chromedriver_linux64.zip
+          CHROME_MAJOR=$(google-chrome --version | awk '{print $3}' | cut -d'.' -f1-3)
+          echo "Installing Chromedriver for Chrome $CHROME_MAJOR"
+          
+          # First try exact version match
+          if wget -q "https://chromedriver.storage.googleapis.com/$(google-chrome --version | awk '{print $3}')/chromedriver_linux64.zip"; then
+            unzip chromedriver_linux64.zip
+          else
+            # Fallback to major version match
+            wget -q "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_MAJOR"
+            CHROMEDRIVER_VERSION=$(cat LATEST_RELEASE_$CHROME_MAJOR)
+            wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
+            unzip chromedriver_linux64.zip
+          fi
+          
           sudo mv chromedriver /usr/local/bin/
-          chromedriver --version
+          sudo chmod +x /usr/local/bin/chromedriver
+          echo "Chromedriver version:" $(chromedriver --version)
 
       - name: Install Python packages
         run: |
