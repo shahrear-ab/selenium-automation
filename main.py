@@ -37,10 +37,14 @@ def submit_application():
     try:
         print(f"\n🚀 Starting submission at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
-        # Configure Chrome
+        # Configure Chrome (Headless for GitHub Actions)
         options = Options()
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_argument("--start-maximized")
+
         
         driver = webdriver.Chrome(
             service=Service(ChromeDriverManager().install()),
