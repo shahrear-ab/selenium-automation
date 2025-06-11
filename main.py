@@ -42,8 +42,9 @@ def submit_application():
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_argument("--window-size=1920,1080")
 
+        # With this:
         driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install()),
+            service=Service('/usr/local/bin/chromedriver'),
             options=options
         )
 
