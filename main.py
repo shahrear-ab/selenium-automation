@@ -11,6 +11,10 @@ import os
 import random
 from datetime import datetime
 
+# Paths to photos in the repo
+PHOTO_PATH = os.path.join(os.getcwd(), "Shahrear Abedin Bhuiyan.jpg")  # Adjust filenames
+UNIVERSITY_PHOTO_PATH = os.path.join(os.getcwd(), "Result.jpg")
+
 def random_delay(min=1, max=3):
     """Random delay between actions to appear more human-like"""
     time.sleep(random.uniform(min, max))
@@ -61,9 +65,7 @@ def submit_application():
         )
 
         safe_upload(
-            driver.find_element(By.NAME, "photo"),
-            r"C:\Users\shahr\OneDrive - BUET\Pictures\Camera Roll\2025\IMG-20250227-WA0000.jpg"
-        )
+            driver.find_element(By.NAME, "photo"), PHOTO_PATH)
 
         # Continue with other fields...
         safe_clear_send(driver.find_element(By.NAME, "address"), "House 13, Road 5, Block D Banasree Rampura Dhaka 1219")
@@ -77,9 +79,7 @@ def submit_application():
         safe_clear_send(driver.find_element(By.NAME, "university-merit-1"), "570")
 
         safe_upload(
-            driver.find_element(By.NAME, "universityPhoto"),
-            r"C:\Users\shahr\OneDrive - BUET\Pictures\Camera Roll\2025\20250310_231802.jpg"
-        )
+            driver.find_element(By.NAME, "universityPhoto"), UNIVERSITY_PHOTO_PATH)
 
         # Final submission
         submit_btn = WebDriverWait(driver, 20).until(
