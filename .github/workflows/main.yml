@@ -1,21 +1,33 @@
 name: Run Selenium 10x Daily
+
 on:
   schedule:
-    - cron: '0 */2 * * *'  # Runs every 2 hours (12x/day)
-  workflow_dispatch:  # Optional: Allows manual runs
+    - cron: '0 * * * *'  # Hourly
+  workflow_dispatch:       # Allow manual runs
 
 jobs:
   automate:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4  # Check out your code
 
-      - name: Install Python + Chrome
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.10
+
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-browser
+          sudo apt-get install -y wget unzip xvfb libxi6 libgconf-2-4 libnss3 libxss1 libappindicator1 libindicator7 fonts-liberation libatk-bridge2.0-0 libgtk-3-0
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome*.deb || sudo apt-get -f install -y
           pip install -r requirements.txt
 
       - name: Run Selenium Script
         run: |
+          Xvfb :99 &  # headless display
+          export DISPLAY=:99
           python main.py
